@@ -7,12 +7,18 @@ const ICONS={
   inicio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
   tareas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 9 1.5 1.5L12 8M8 15l1.5 1.5L12 14M14.5 9.5H17M14.5 15.5H17"/></svg>',
   horario:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></svg>',
+  colaborar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>'
 };
-const ROUTES=[{id:'inicio',n:'Inicio'},{id:'tareas',n:'Mis tareas'},{id:'horario',n:'Mi horario'}];
+const ROUTES=[
+  {id:'inicio',n:'Inicio'},
+  {id:'tareas',n:'Mis tareas'},
+  {id:'horario',n:'Mi horario'},
+  {id:'colaborar',n:'Colaborar'}
+];
 
 const KEY='unifacil.tasks.v1';
 let tasks;
@@ -80,6 +86,7 @@ function viewHome(){
   <div class="quick">
     <a class="qa" href="#tareas"><span class="ic" style="background:var(--accent-soft);color:var(--accent)">${ICONS.tareas}</span><div><b>Mis tareas</b><span class="num">${open.length} actividades por entregar</span></div>${ICONS.chev}</a>
     <a class="qa" href="#horario"><span class="ic" style="background:var(--lav-soft);color:var(--s-lav)">${ICONS.horario}</span><div><b>Mi horario</b><span class="num">${CLASSES.length} clases a la semana</span></div>${ICONS.chev}</a>
+    <a class="qa" href="#colaborar"><span class="ic" style="background:var(--ok-soft);color:var(--ok)">${ICONS.colaborar}</span><div><b>Colaborar</b><span>Promover la colaboración y el intercambio de conocimiento</span></div>${ICONS.chev}</a>
   </div>
   <div class="cols">
     <div>
@@ -133,6 +140,25 @@ function viewSchedule(){
   <div class="legend">${Object.values(SUBJ).map(s=>`<span><i class="dot" style="background:${s.c}"></i>${s.n}</span>`).join('')}</div>`;
 }
 
+function viewCollab(){
+  const share=encodeURIComponent('Promovamos la colaboración y el intercambio de conocimiento con UniFácil: https://scarss11.github.io/UniFacil/');
+  const ideas=[
+    ['Grupos de estudio','Reúnete con compañeros de tu asignatura para repasar antes de cada entrega.'],
+    ['Apuntes compartidos','Intercambia resúmenes, talleres y dudas para que el grupo avance junto.'],
+    ['Resolver en equipo','Si una tarea se atasca, coméntala con tu grupo antes de la fecha límite.']
+  ];
+  return `
+  <div class="head"><div><div class="eyebrow">Comunidad</div><h1>Colaboración</h1></div>
+    <a class="btn" href="https://wa.me/?text=${share}" target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a></div>
+  <div class="hero-card collab-lead">
+    <p>UniFácil · comunidad</p>
+    <div class="motto">Promover la colaboración y el intercambio de conocimiento</div>
+  </div>
+  <div class="list" style="margin-top:16px">${ideas.map(([t,d])=>`<div class="item"><div class="body"><div class="title">${t}</div><div class="meta">${d}</div></div></div>`).join('')}</div>
+  <div class="sec-h"><h2>Grupos por asignatura</h2></div>
+  <div class="list classes">${Object.values(SUBJ).map(s=>`<div class="item"><i class="bar" style="background:${s.c}"></i><div class="body"><div class="title">Grupo de ${esc(s.n)}</div><div class="meta">Espacio para compartir apuntes y dudas</div></div></div>`).join('')}</div>`;
+}
+
 /* ---------- Navegación ---------- */
 function route(){return ROUTES.some(r=>'#'+r.id===location.hash)?location.hash.slice(1):'inicio'}
 function render(){
@@ -140,7 +166,7 @@ function render(){
   const nav=ROUTES.map(x=>`<a href="#${x.id}" ${x.id===r?'aria-current="page"':''}>${ICONS[x.id]}<span>${x.n}</span></a>`).join('');
   document.getElementById('sideNav').innerHTML=nav;
   document.getElementById('tabBar').innerHTML=nav;
-  document.getElementById('view').innerHTML=r==='tareas'?viewTasks():r==='horario'?viewSchedule():viewHome();
+  document.getElementById('view').innerHTML=r==='tareas'?viewTasks():r==='horario'?viewSchedule():r==='colaborar'?viewCollab():viewHome();
 }
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
 

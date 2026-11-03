@@ -42,7 +42,7 @@ button{cursor:pointer;border:0;background:none}
 .logo{width:40px;height:40px;flex:none}
 .side-nav{display:flex;flex-direction:column;gap:4px}
 .side-nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--fg);text-decoration:none;font-weight:500}
-.side-nav a svg{width:22px;height:22px;color:var(--accent)}
+.side-nav a svg{width:22px;height:22px;color:var(--accent);flex:none}
 .side-nav a:hover{background:var(--fill)}
 .side-nav a[aria-current="page"]{background:var(--accent);color:#fff}
 .side-nav a[aria-current="page"] svg{color:#fff}
@@ -83,6 +83,8 @@ h2{font-size:20px;font-weight:600;letter-spacing:-.015em;margin:0}
 .dot{width:9px;height:9px;border-radius:50%;flex:none}
 
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.quick .qa:last-child:nth-child(odd){grid-column:1/-1}
+.collab-lead{margin-top:4px}
 .qa{display:flex;align-items:center;gap:16px;padding:18px;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);text-decoration:none;color:var(--fg);transition:transform .15s ease}
 .qa:hover{transform:translateY(-2px)}
 .qa .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none}
@@ -155,7 +157,8 @@ h2{font-size:20px;font-weight:600;letter-spacing:-.015em;margin:0}
 /* Tab bar (phone) */
 .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);backdrop-filter:saturate(1.6) blur(20px);-webkit-backdrop-filter:saturate(1.6) blur(20px);border-top:1px solid var(--sep);
   padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));justify-content:space-around}
-.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:500;color:var(--fg2);text-decoration:none;padding:4px 14px}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;font-size:11px;font-weight:500;color:var(--fg2);text-decoration:none;padding:4px 4px;text-align:center}
+.tabbar a span{line-height:1.15}
 .tabbar a svg{width:25px;height:25px}
 .tabbar a[aria-current="page"]{color:var(--accent)}
 
