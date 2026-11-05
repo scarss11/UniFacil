@@ -86,7 +86,7 @@ function viewHome(){
   <div class="quick">
     <a class="qa" href="#tareas"><span class="ic" style="background:var(--accent-soft);color:var(--accent)">${ICONS.tareas}</span><div><b>Mis tareas</b><span class="num">${open.length} actividades por entregar</span></div>${ICONS.chev}</a>
     <a class="qa" href="#horario"><span class="ic" style="background:var(--lav-soft);color:var(--s-lav)">${ICONS.horario}</span><div><b>Mi horario</b><span class="num">${CLASSES.length} clases a la semana</span></div>${ICONS.chev}</a>
-    <a class="qa" href="#colaborar"><span class="ic" style="background:var(--ok-soft);color:var(--ok)">${ICONS.colaborar}</span><div><b>Colaborar</b><span>Promover la colaboración y el intercambio de conocimiento</span></div>${ICONS.chev}</a>
+    <a class="qa" href="#colaborar"><span class="ic" style="background:var(--ok-soft);color:var(--ok)">${ICONS.colaborar}</span><div><b>Colaborar</b><span>Foro para compartir dudas y apuntes</span></div>${ICONS.chev}</a>
   </div>
   <div class="cols">
     <div>
@@ -140,23 +140,109 @@ function viewSchedule(){
   <div class="legend">${Object.values(SUBJ).map(s=>`<span><i class="dot" style="background:${s.c}"></i>${s.n}</span>`).join('')}</div>`;
 }
 
-function viewCollab(){
-  const share=encodeURIComponent('Promovamos la colaboración y el intercambio de conocimiento con UniFácil: https://scarss11.github.io/UniFacil/');
-  const ideas=[
-    ['Grupos de estudio','Reúnete con compañeros de tu asignatura para repasar antes de cada entrega.'],
-    ['Apuntes compartidos','Intercambia resúmenes, talleres y dudas para que el grupo avance junto.'],
-    ['Resolver en equipo','Si una tarea se atasca, coméntala con tu grupo antes de la fecha límite.']
+/* ---------- Foro ---------- */
+const FORUM_KEY='unifacil.forum.v1';
+const NAME_KEY='unifacil.forum.name';
+let forumName='';
+try{forumName=localStorage.getItem(NAME_KEY)||''}catch(e){}
+const saveName=n=>{forumName=n.trim();try{localStorage.setItem(NAME_KEY,forumName)}catch(e){}};
+const ago=ts=>{
+  const m=Math.max(0,Math.round((Date.now()-ts)/60000));
+  if(m<1)return'Ahora';
+  if(m<60)return'Hace '+m+' min';
+  const h=Math.round(m/60);
+  if(h<24)return'Hace '+h+' h';
+  const d=Math.round(h/24);
+  return d===1?'Ayer':'Hace '+d+' días';
+};
+const activity=p=>Math.max(p.created,...(p.replies||[]).map(r=>r.created));
+function seedForum(){
+  const h=n=>Date.now()-n*3600000;
+  return [
+    {id:101,s:'prog',author:'Camila Ríos',created:h(5),title:'¿Qué incluye la entrega 1 del inventario?',body:'No me queda claro si el primer entregable es solo el diagrama o también las pantallas. Si alguien ya lo confirmó con el profesor, ¿lo puede dejar por aquí?',replies:[
+      {id:102,author:'Andrés Melo',created:h(4),body:'Pregunté hoy: la entrega 1 es el modelo de datos y un pantallazo de las pantallas. El código va en la entrega 2.'}
+    ]},
+    {id:103,s:'calc',author:'Mateo López',created:h(20),title:'Resumen corto de derivadas parciales',body:'Dejo los tres pasos que usé en el taller: identificar la variable que se deriva, tratar las demás como constantes y revisar el resultado con un punto conocido. Si ven un error, corríjanlo.',replies:[
+      {id:104,author:'Sara Gómez',created:h(18),body:'Me sirvió. En el ejercicio 4 también hay que aplicar la regla de la cadena porque z depende de x y de y.'}
+    ]},
+    {id:105,s:'fis',author:'Laura Peña',created:h(8),title:'Duda del péndulo: ¿desde dónde mido la longitud?',body:'En el informe del laboratorio medí hasta el centro de la esfera. ¿Es así o se mide hasta el borde?',replies:[]},
+    {id:106,s:'eti',author:'Sara Gómez',created:h(30),title:'Ideas para el ensayo de dilemas de la IA',body:'Estoy armando el ensayo con dos casos: un sistema que recomienda notas y otro que filtra hojas de vida. ¿Alguien tiene una fuente corta y confiable para citar?',replies:[
+      {id:107,author:'Camila Ríos',created:h(26),body:'En la biblioteca está el capítulo 3 de la lectura. Resume bien el principio de no hacer daño sin ponerse tan técnico.'}
+    ]}
   ];
+}
+let forum;
+try{forum=JSON.parse(localStorage.getItem(FORUM_KEY))}catch(e){}
+if(!Array.isArray(forum)||!forum.length){forum=seedForum();try{localStorage.setItem(FORUM_KEY,JSON.stringify(forum))}catch(e){}}
+const saveForum=()=>{try{localStorage.setItem(FORUM_KEY,JSON.stringify(forum))}catch(e){}};
+let forumOpen=null, forumSubj='todas';
+const initial=n=>esc((n.trim()[0]||'?').toUpperCase());
+const replyLabel=n=>n===1?'1 respuesta':n+' respuestas';
+
+function viewCollab(){
+  const post=forum.find(p=>p.id===forumOpen);
+  if(forumOpen&&!post)forumOpen=null;
+  if(post)return viewThread(post);
+  const chips=[['todas','Todas'],...Object.entries(SUBJ)];
+  const list=forum.filter(p=>forumSubj==='todas'||p.s===forumSubj).sort((a,b)=>activity(b)-activity(a));
   return `
-  <div class="head"><div><div class="eyebrow">Comunidad</div><h1>Colaboración</h1></div>
-    <a class="btn" href="https://wa.me/?text=${share}" target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a></div>
-  <div class="hero-card collab-lead">
-    <p>UniFácil · comunidad</p>
-    <div class="motto">Promover la colaboración y el intercambio de conocimiento</div>
-  </div>
-  <div class="list" style="margin-top:16px">${ideas.map(([t,d])=>`<div class="item"><div class="body"><div class="title">${t}</div><div class="meta">${d}</div></div></div>`).join('')}</div>
-  <div class="sec-h"><h2>Grupos por asignatura</h2></div>
-  <div class="list classes">${Object.values(SUBJ).map(s=>`<div class="item"><i class="bar" style="background:${s.c}"></i><div class="body"><div class="title">Grupo de ${esc(s.n)}</div><div class="meta">Espacio para compartir apuntes y dudas</div></div></div>`).join('')}</div>`;
+  <div class="head"><div><div class="eyebrow">Foro de la clase</div><h1>Colaborar</h1><p class="lead">Publica una duda o un apunte por asignatura. Tus compañeros responden en el mismo hilo.</p></div>
+    <button class="btn" data-act="forum">${ICONS.plus}Publicar</button></div>
+  <div class="who"><label for="whoName">Tu nombre en el foro</label><input id="whoName" maxlength="32" value="${esc(forumName)}" placeholder="Ej. Camila" autocomplete="nickname"></div>
+  <div class="toolbar"><div class="seg" role="group" aria-label="Filtrar por asignatura">
+    ${chips.map(([k,s])=>`<button data-forum="${k}" aria-pressed="${forumSubj===k}">${typeof s==='string'?s:s.n}</button>`).join('')}
+  </div></div>
+  <div class="list forum">${list.map(p=>`<button type="button" class="post" data-act="open-post" data-id="${p.id}">
+    <span class="avatar" style="background:color-mix(in srgb,${SUBJ[p.s].c} 18%,var(--card));color:${SUBJ[p.s].c}">${initial(p.author)}</span>
+    <span class="body"><span class="meta">${esc(p.author)} · ${subjBadge(p.s)} · ${ago(activity(p))}</span><span class="title">${esc(p.title)}</span><span class="excerpt">${esc(p.body)}</span></span>
+    <span class="replies num">${replyLabel(p.replies.length)}</span>
+  </button>`).join('')||'<div class="empty">Nadie ha publicado en esta asignatura. Sé la primera persona en compartir algo.</div>'}</div>
+  <p class="hint">Las publicaciones se guardan en este navegador. Desde cada hilo puedes enviar el mensaje por WhatsApp para que otra persona lo vea.</p>`;
+}
+function viewThread(p){
+  const text=encodeURIComponent(`${p.title}\n\n${p.body}\n— ${p.author}, foro de UniFácil`);
+  const replies=p.replies.slice().sort((a,b)=>a.created-b.created);
+  return `
+  <button type="button" class="back" data-act="forum-back">← Volver al foro</button>
+  <div class="head"><div><div class="eyebrow">${SUBJ[p.s].n}</div><h1>${esc(p.title)}</h1></div>
+    <a class="btn ghost" href="https://wa.me/?text=${text}" target="_blank" rel="noopener noreferrer">Enviar por WhatsApp</a></div>
+  <div class="who"><label for="whoName">Respondes como</label><input id="whoName" maxlength="32" value="${esc(forumName)}" placeholder="Ej. Camila" autocomplete="nickname"></div>
+  <article class="thread">
+    <div class="post static">
+      <span class="avatar" style="background:color-mix(in srgb,${SUBJ[p.s].c} 18%,var(--card));color:${SUBJ[p.s].c}">${initial(p.author)}</span>
+      <div class="body"><div class="meta">${esc(p.author)} · ${ago(p.created)}</div><p class="post-body">${esc(p.body)}</p></div>
+    </div>
+    ${replies.map(r=>`<div class="reply"><span class="avatar">${initial(r.author)}</span><div class="body"><div class="meta">${esc(r.author)} · ${ago(r.created)}</div><p class="post-body">${esc(r.body)}</p></div></div>`).join('')||'<p class="hint">Todavía no hay respuestas. Comparte lo que sepas.</p>'}
+    <form class="composer" id="replyForm">
+      <label for="replyBody">Tu respuesta</label>
+      <textarea id="replyBody" rows="3" maxlength="600" placeholder="Un apunte, una duda o una corrección"></textarea>
+      <p class="err" id="replyErr" hidden></p>
+      <button class="btn" type="submit">Responder</button>
+    </form>
+  </article>`;
+}
+function bindForum(){
+  const who=document.getElementById('whoName');
+  if(who)who.addEventListener('change',()=>saveName(who.value));
+  const form=document.getElementById('replyForm');
+  if(!form)return;
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const post=forum.find(p=>p.id===forumOpen);
+    const body=document.getElementById('replyBody').value.trim();
+    const err=document.getElementById('replyErr');
+    const name=currentName();
+    if(!name){err.textContent='Escribe tu nombre para que sepan quién responde.';err.hidden=false;document.getElementById('whoName').focus();return}
+    if(!body){err.textContent='Escribe una respuesta para publicarla.';err.hidden=false;return}
+    post.replies.push({id:Date.now(),author:name,created:Date.now(),body});
+    saveForum();render();
+  });
+}
+function currentName(){
+  const el=document.getElementById('whoName');
+  const n=(el?el.value:forumName).trim();
+  if(n)saveName(n);
+  return forumName;
 }
 
 /* ---------- Navegación ---------- */
@@ -167,15 +253,20 @@ function render(){
   document.getElementById('sideNav').innerHTML=nav;
   document.getElementById('tabBar').innerHTML=nav;
   document.getElementById('view').innerHTML=r==='tareas'?viewTasks():r==='horario'?viewSchedule():r==='colaborar'?viewCollab():viewHome();
+  bindForum();
 }
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+window.addEventListener('hashchange',()=>{if(route()!=='colaborar')forumOpen=null;render();window.scrollTo(0,0)});
 
 document.addEventListener('click',e=>{
   const f=e.target.closest('[data-filter]'); if(f){filter=f.dataset.filter;render();return}
   const d=e.target.closest('[data-day]'); if(d){mDay=+d.dataset.day;render();return}
+  const ff=e.target.closest('[data-forum]'); if(ff){forumSubj=ff.dataset.forum;render();return}
   const a=e.target.closest('[data-act]'); if(!a)return;
   const act=a.dataset.act;
   if(act==='new'){openSheet();return}
+  if(act==='forum'){openForum();return}
+  if(act==='forum-back'){forumOpen=null;render();return}
+  if(act==='open-post'){forumOpen=+a.dataset.id;render();return}
   const id=+a.closest('[data-id]')?.dataset.id; const t=tasks.find(x=>x.id===id); if(!t)return;
   if(act==='toggle')t.st=t.st==='completada'?'pendiente':'completada';
   if(act==='cycle')t.st=NEXT[t.st];
@@ -210,6 +301,37 @@ function openSheet(){
     if(!f){err.textContent='Elige una fecha de entrega.';err.hidden=false;return}
     tasks.push({id:Date.now(),n,s:document.getElementById('fSubj').value,f,st:document.getElementById('fSt').value});
     save();closeSheet();render();
+  });
+}
+function openForum(){
+  lastFocus=document.activeElement;
+  const name=currentName();
+  document.getElementById('sheetRoot').innerHTML=`
+  <div class="scrim" id="scrim"><form class="sheet" id="postForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" novalidate>
+    <div class="sheet-h"><button type="button" class="l" id="cancelBtn">Cancelar</button><b id="sheetTitle">Nueva publicación</b><button type="submit" class="r">Publicar</button></div>
+    <div class="form">
+      <div class="field"><label for="pName">Tu nombre</label><input id="pName" maxlength="32" autocomplete="nickname" value="${esc(name)}" placeholder="Ej. Camila"></div>
+      <div class="field"><label for="pSubj">Asignatura</label><select id="pSubj">${Object.entries(SUBJ).map(([k,s])=>`<option value="${k}" ${k===forumSubj?'selected':''}>${s.n}</option>`).join('')}</select></div>
+      <div class="field"><label for="pTitle">Título</label><input id="pTitle" maxlength="80" autocomplete="off" placeholder="Ej. Duda del taller 2"></div>
+      <div class="field"><label for="pBody">Qué quieres compartir</label><textarea id="pBody" rows="4" maxlength="600" placeholder="Una duda, un resumen o un dato que le sirva al grupo"></textarea></div>
+    </div>
+    <p class="err" id="pErr" hidden></p>
+  </form></div>`;
+  const title=document.getElementById('pTitle'); title.focus();
+  document.getElementById('cancelBtn').onclick=closeSheet;
+  document.getElementById('scrim').addEventListener('click',e=>{if(e.target.id==='scrim')closeSheet()});
+  document.getElementById('postForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const who=document.getElementById('pName').value.trim();
+    const n=title.value.trim(), body=document.getElementById('pBody').value.trim();
+    const err=document.getElementById('pErr');
+    if(!who){err.textContent='Escribe tu nombre para que sepan quién publica.';err.hidden=false;return}
+    if(!n){err.textContent='Escribe un título para la publicación.';err.hidden=false;title.focus();return}
+    if(!body){err.textContent='Cuenta qué quieres compartir.';err.hidden=false;return}
+    saveName(who);
+    const subj=document.getElementById('pSubj').value;
+    forum.unshift({id:Date.now(),s:subj,author:who,created:Date.now(),title:n,body,replies:[]});
+    forumSubj='todas';forumOpen=null;saveForum();closeSheet();render();
   });
 }
 function closeSheet(){document.getElementById('sheetRoot').innerHTML='';lastFocus&&lastFocus.focus&&lastFocus.focus()}

@@ -133,6 +133,31 @@ h2{font-size:20px;font-weight:600;letter-spacing:-.015em;margin:0}
 .seg .count{color:var(--fg2);margin-left:4px;font-weight:400}
 .toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
 .hint{font-size:13px;color:var(--fg2);margin:12px 4px 0}
+.lead{margin:8px 0 0;color:var(--fg2);font-size:15px;max-width:48ch}
+
+.who{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;background:var(--card);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+.who label{font-size:13px;color:var(--fg2);font-weight:500}
+.who input{border:0;background:var(--fill);border-radius:10px;padding:8px 12px;width:min(220px,100%);font:inherit}
+.forum .post{position:relative;display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;padding:14px 16px;font:inherit;color:inherit}
+.post .body{flex:1;min-width:0}
+.post .title{display:block;font-weight:600;line-height:1.35;margin-top:2px}
+.post .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--fg2)}
+.forum .post+.post::before{content:"";position:absolute;top:0;left:64px;right:0;height:1px;background:var(--sep)}
+.forum .post:hover{background:var(--fill)}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;background:var(--accent-soft);color:var(--accent)}
+.post .excerpt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--fg2);font-size:13px;margin-top:4px}
+.replies{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--fg2);background:var(--fill);border-radius:999px;padding:4px 8px;white-space:nowrap}
+.back{color:var(--accent);font-weight:600;margin-bottom:12px}
+.thread{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:6px 16px 16px}
+.post.static{padding:14px 0}
+.reply{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--sep)}
+.post-body{margin:6px 0 0;white-space:pre-wrap}
+.composer{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--sep)}
+.composer label{font-size:12px;color:var(--fg2);font-weight:500}
+.composer textarea,.field textarea{width:100%;border:0;background:var(--fill);border-radius:14px;padding:12px 14px;resize:vertical;font:inherit;outline:none}
+.field textarea{background:transparent;padding:2px 0;border-radius:0}
+.composer .btn{align-self:flex-end}
+.composer .err,.thread .hint{margin:0}
 
 /* Schedule grid */
 .week{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow-x:auto}
